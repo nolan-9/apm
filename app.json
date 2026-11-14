@@ -1,8 +1,8 @@
 {
   "expo": {
-    "scheme": "shelfieapp",
-    "name": "AplicacionMobil",
-    "slug": "AplicacionMobil",
+    "scheme": "mercadosimple",
+    "name": "Mercado Simple",
+    "slug": "mercado-simple",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -23,7 +23,9 @@
     },
     "plugins": [
       "expo-status-bar",
-      "expo-asset"
+      "expo-asset",
+      ["expo-router", { "root": "src/app" }],
+      "expo-secure-store"
     ]
   }
 }

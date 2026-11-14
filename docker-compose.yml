@@ -1,18 +1,14 @@
 
 services:
-  strapi:
-    container_name: tci-2026b-strapi
-    image: strapi/strapi
-    environment:
-      - DATABASE_CLIENT=mongo
-      - DATABASE_HOST=cluster0.pa3m6qy.mongodb.net
-      - DATABASE_PORT=27017
-      - DATABASE_SSL=true
-      - DATABASE_SRV=true
-      - DATABASE_NAME=FIN2026b 
-      - DATABASE_USERNAME=noba2002_db_user
-      - DATABASE_PASSWORD=xS84xzjrfJHUtTOg
+  mongodb:
+    image: mongo:7.0
+    container_name: mercado-simple-mongodb
+    restart: unless-stopped
     ports:
-      - 1337:1337    
-      
+      - "127.0.0.1:27017:27017"
+    volumes:
+      - mercado_simple_data:/data/db
+
+volumes:
+  mercado_simple_data:
 
