@@ -1,8 +1,8 @@
 {
   "expo": {
-    "scheme": "mercadosimple",
-    "name": "Mercado Simple",
-    "slug": "mercado-simple",
+    "scheme": "FINazon",
+    "name": "FINazon",
+    "slug": "FINazon",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
