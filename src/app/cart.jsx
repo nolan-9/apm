@@ -38,6 +38,39 @@ export default function CartScreen() {
     }
   }
 
+
+async function subtractOne(productId) {
+  try {
+    const data = await apiRequest(`/cart/${productId}`, {
+      method: 'PATCH',
+      token
+    });
+
+    if (data.removed) {
+      // Eliminar el producto de la pantalla
+      setItems((current) =>
+        current.filter(
+          (item) => item.product._id !== productId
+        )
+      );
+    } else {
+      // Actualizar la cantidad en la pantalla
+      setItems((current) =>
+        current.map((item) =>
+          item.product._id === productId
+            ? { ...item, quantity: data.quantity }
+            : item
+        )
+      );
+    }
+
+    setError('');
+  } catch (requestError) {
+    setError(requestError.message);
+  }
+}
+
+
   async function removeItem(productId) {
     try {
       await apiRequest(`/cart/${productId}`, { method: 'DELETE', token });
@@ -69,8 +102,10 @@ export default function CartScreen() {
           <CartItem
             item={item}
             onAdd={() => addAnother(item.product._id)}
+            onSubtract={() => subtractOne(item.product._id)}
             onRemove={() => removeItem(item.product._id)}
           />
+
         )}
       />
     </AppScreen>
