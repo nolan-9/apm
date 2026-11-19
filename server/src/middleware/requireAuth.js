@@ -8,7 +8,7 @@ export default async function requireAuth(req, res, next) {
 
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(payload.sub).select('name email');
+    const user = await User.findById(payload.sub).select('name email role');
     if (!user) return res.status(401).json({ message: 'La sesión ya no es válida. Inicia sesión de nuevo.' });
     req.user = user;
     return next();

@@ -1,12 +1,16 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { router } from 'expo-router';
 import ProductEditor from '../../components/ProductEditor';
-import { useAuth } from '../../context/AuthContext';
+import useRequireAuth from '../../hooks/useRequireAuth';
 import { apiRequest } from '../../services/api';
 
 export default function NewProductScreen() {
-  const { token } = useAuth();
+  const { token, user, loading } = useRequireAuth();
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (!loading && user?.role !== 'admin') router.replace('/products');
+  }, [loading, user]);
 
   async function saveProduct(values) {
     setSaving(true);
@@ -16,6 +20,10 @@ export default function NewProductScreen() {
     } finally {
       setSaving(false);
     }
+  }
+
+  if (loading || user?.role !== 'admin') {
+    return null;
   }
 
   return <ProductEditor title="Agregar producto" onSave={saveProduct} saving={saving} />;

@@ -44,9 +44,6 @@ router.post('/:productId', async (req, res, next) => {
   }
 });
 
-router.delete('/:productId', async (req, res, next) => {
-
-
 router.patch('/:productId', async (req, res, next) => {
   try {
     const productId = req.params.productId;
@@ -75,7 +72,6 @@ router.patch('/:productId', async (req, res, next) => {
       });
     }
 
-    // Si solamente queda una unidad, eliminar el producto
     if (item.quantity <= 1) {
       user.cart = user.cart.filter(
         (entry) => String(entry.product) !== String(productId)
@@ -89,7 +85,6 @@ router.patch('/:productId', async (req, res, next) => {
       });
     }
 
-    // Si hay más de una unidad, disminuir la cantidad
     item.quantity -= 1;
 
     await user.save();
@@ -104,7 +99,7 @@ router.patch('/:productId', async (req, res, next) => {
   }
 });
 
-
+router.delete('/:productId', async (req, res, next) => {
   try {
     if (!validId(req.params.productId)) return res.status(400).json({ message: 'El producto solicitado no es válido.' });
     await User.findByIdAndUpdate(req.user.id, { $pull: { cart: { product: req.params.productId } } });

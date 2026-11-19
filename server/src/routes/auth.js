@@ -11,7 +11,7 @@ function createToken(user) {
 }
 
 function userResponse(user) {
-  return { id: user.id, name: user.name, email: user.email };
+  return { id: user.id, name: user.name, email: user.email, role: user.role || 'user' };
 }
 
 router.post('/register', async (req, res, next) => {

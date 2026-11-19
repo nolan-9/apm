@@ -78,6 +78,7 @@ export default function ProductsScreen() {
   });
 
   if (authLoading || !user) return <AppScreen style={styles.center}><ActivityIndicator size="large" color={theme.colors.primary} /></AppScreen>;
+  const isAdmin = user.role === 'admin';
 
   return (
     <AppScreen>
@@ -90,12 +91,14 @@ export default function ProductsScreen() {
           <View>
             <View style={styles.header}>
               <View style={styles.greeting}><Text style={styles.eyebrow}>FINazon</Text><Text style={styles.welcome}>Hola, {user.name}</Text></View>
-              <Pressable onPress={() => router.push('/cart')} accessibilityRole="button" style={styles.cartButton}>
-                <Text style={styles.cartText}>Carrito · {cartCount}</Text>
-              </Pressable>
+              {isAdmin ? (
+                <Pressable onPress={() => router.push('/cart')} accessibilityRole="button" style={styles.cartButton}>
+                  <Text style={styles.cartText}>Carrito · {cartCount}</Text>
+                </Pressable>
+              ) : null}
             </View>
             <View style={styles.toolbar}>
-              <AppButton title="＋ Producto" variant="primary" onPress={() => router.push('/products/new')} style={styles.createButton} />
+              {isAdmin ? <AppButton title="＋ Producto" variant="primary" onPress={() => router.push('/products/new')} style={styles.createButton} /> : null}
               <Pressable onPress={signOut} accessibilityRole="button" style={styles.logout}><Text style={styles.logoutText}>Salir</Text></Pressable>
             </View>
             <Text style={styles.heading}>Catálogo</Text>
@@ -112,6 +115,7 @@ export default function ProductsScreen() {
             onAdd={() => addToCart(item)}
             onEdit={() => router.push(`/products/${item._id}/edit`)}
             onDelete={() => deleteProduct(item)}
+            isAdmin={isAdmin}
           />
         )}
       />

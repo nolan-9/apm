@@ -10,13 +10,17 @@ import theme from '../../../styles/theme';
 
 export default function EditProductScreen() {
   const { id } = useLocalSearchParams();
-  const { token } = useRequireAuth();
+  const { token, user, loading: authLoading } = useRequireAuth();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
+    if (!authLoading && user?.role !== 'admin') {
+      router.replace('/products');
+      return undefined;
+    }
     let active = true;
     if (!token || typeof id !== 'string') return undefined;
     apiRequest(`/products/${id}`, { token })
@@ -24,7 +28,7 @@ export default function EditProductScreen() {
       .catch((requestError) => { if (active) setError(requestError.message); })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
-  }, [id, token]);
+  }, [id, token, authLoading, user]);
 
   async function saveProduct(values) {
     setSaving(true);

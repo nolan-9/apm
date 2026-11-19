@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import Product from '../models/Product.js';
 import User from '../models/User.js';
 import requireAuth from '../middleware/requireAuth.js';
+import requireAdmin from '../middleware/requireAdmin.js';
 
 const router = Router();
 router.use(requireAuth);
@@ -47,7 +48,7 @@ router.get('/:id', async (req, res, next) => {
   }
 });
 
-router.post('/', async (req, res, next) => {
+router.post('/', requireAdmin, async (req, res, next) => {
   try {
     const product = await Product.create(fieldsFrom(req.body || {}, { creating: true }));
     return res.status(201).json({ product });
@@ -56,7 +57,7 @@ router.post('/', async (req, res, next) => {
   }
 });
 
-router.put('/:id', async (req, res, next) => {
+router.put('/:id', requireAdmin, async (req, res, next) => {
   try {
     if (!validId(req.params.id)) return res.status(400).json({ message: 'El producto solicitado no es válido.' });
     const product = await Product.findByIdAndUpdate(req.params.id, { $set: fieldsFrom(req.body || {}) }, { new: true, runValidators: true });
@@ -67,7 +68,7 @@ router.put('/:id', async (req, res, next) => {
   }
 });
 
-router.delete('/:id', async (req, res, next) => {
+router.delete('/:id', requireAdmin, async (req, res, next) => {
   try {
     if (!validId(req.params.id)) return res.status(400).json({ message: 'El producto solicitado no es válido.' });
     const product = await Product.findByIdAndDelete(req.params.id);
