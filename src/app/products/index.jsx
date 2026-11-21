@@ -90,17 +90,53 @@ export default function ProductsScreen() {
         ListHeaderComponent={(
           <View>
             <View style={styles.header}>
-              <View style={styles.greeting}><Text style={styles.eyebrow}>FINazon</Text><Text style={styles.welcome}>Hola, {user.name}</Text></View>
-              {isAdmin ? (
-                <Pressable onPress={() => router.push('/cart')} accessibilityRole="button" style={styles.cartButton}>
-                  <Text style={styles.cartText}>Carrito · {cartCount}</Text>
-                </Pressable>
-              ) : null}
+              <View style={styles.greeting}>
+                <Text style={styles.eyebrow}>FINazon</Text>
+                <Text style={styles.welcome}>Hola, {user.name}</Text>
             </View>
+
+             {/* El carrito está disponible para todos los usuarios */}
+            <Pressable
+              onPress={() => router.push('/cart')}
+              accessibilityRole="button"
+              style={styles.cartButton}
+            >
+              <Text style={styles.cartText}>
+                Carrito · {cartCount}
+              </Text>
+            </Pressable>
+          </View>
+
             <View style={styles.toolbar}>
-              {isAdmin ? <AppButton title="＋ Producto" variant="primary" onPress={() => router.push('/products/new')} style={styles.createButton} /> : null}
-              <Pressable onPress={signOut} accessibilityRole="button" style={styles.logout}><Text style={styles.logoutText}>Salir</Text></Pressable>
-            </View>
+  {isAdmin ? (
+    <>
+      <AppButton
+        title="＋ Producto"
+        variant="primary"
+        onPress={() => router.push('/products/new')}
+        style={styles.createButton}
+      />
+
+      <Pressable
+        onPress={() => router.push('/stats')}
+        accessibilityRole="button"
+        style={styles.statsButton}
+      >
+        <Text style={styles.statsButtonText}>
+          Estadísticas
+        </Text>
+      </Pressable>
+    </>
+  ) : null}
+
+  <Pressable
+    onPress={signOut}
+    accessibilityRole="button"
+    style={styles.logout}
+  >
+    <Text style={styles.logoutText}>Salir</Text>
+  </Pressable>
+</View>
             <Text style={styles.heading}>Catálogo</Text>
             <Text style={styles.subtitle}>Explora y administra los productos.</Text>
             <TextField label="Buscar" value={search} onChangeText={setSearch} placeholder="Nombre, categoría…" returnKeyType="search" style={styles.search} />
@@ -132,7 +168,7 @@ const styles = StyleSheet.create({
   welcome: { color: theme.colors.text, fontSize: 20, fontWeight: '800', marginTop: 3 },
   cartButton: { paddingHorizontal: 13, paddingVertical: 11, backgroundColor: theme.colors.surface, borderRadius: 12, borderColor: theme.colors.border, borderWidth: 1 },
   cartText: { color: theme.colors.primary, fontSize: 14, fontWeight: '700' },
-  toolbar: { flexDirection: 'row', alignItems: 'center', gap: 14, marginBottom: 20 },
+  toolbar: { flexDirection: 'row', alignItems: 'center',  flexWrap: 'wrap', gap: 14, marginBottom: 20 },
   createButton: { minHeight: 42, paddingHorizontal: 13 },
   logout: { paddingVertical: 10, paddingHorizontal: 5 },
   logoutText: { color: theme.colors.muted, fontWeight: '600' },
@@ -142,4 +178,18 @@ const styles = StyleSheet.create({
   error: { color: theme.colors.danger, marginBottom: 12 },
   spinner: { marginVertical: 24 },
   empty: { color: theme.colors.muted, textAlign: 'center', paddingVertical: 26, lineHeight: 21 },
+  statsButton: {
+  paddingHorizontal: 12,
+  paddingVertical: 11,
+  borderWidth: 1,
+  borderColor: theme.colors.primary,
+  borderRadius: 12,
+  backgroundColor: theme.colors.surface,
+},
+
+statsButtonText: {
+  color: theme.colors.primary,
+  fontSize: 13,
+  fontWeight: '700',
+},
 });

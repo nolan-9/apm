@@ -10,6 +10,8 @@ import User from './models/User.js';
 import authRoutes from './routes/auth.js';
 import cartRoutes from './routes/cart.js';
 import productRoutes from './routes/products.js';
+import categoryRoutes from './routes/categories.js';
+import statsRoutes from './routes/stats.js';
 
 const app = express();
 const port = Number(process.env.PORT) || 4000;
@@ -24,10 +26,22 @@ app.use(helmet());
 app.use(cors());
 app.use(express.json({ limit: '1mb' }));
 
-app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
-app.use('/api/auth', rateLimit({ windowMs: 15 * 60 * 1000, limit: 30 }), authRoutes);
+
+app.get('/api/health', (_req, res) =>
+  res.json({ status: 'ok' })
+);
+
+app.use(
+  '/api/auth',
+  rateLimit({ windowMs: 15 * 60 * 1000, limit: 30 }),
+  authRoutes
+);
+
 app.use('/api/products', productRoutes);
 app.use('/api/cart', cartRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/stats', statsRoutes);
+
 
 app.use((_req, res) => res.status(404).json({ message: 'No se encontró esta ruta.' }));
 app.use((error, _req, res, _next) => {

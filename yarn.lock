@@ -1317,6 +1317,11 @@
   resolved "https://registry.npmjs.org/@react-native-masked-view/masked-view/-/masked-view-0.3.2.tgz"
   integrity sha512-XwuQoW7/GEgWRMovOQtX3A4PrXhyaZm0lVUiY8qJDvdngjLms9Cpdck6SmGAUNqQwcj2EadHC1HwL0bEyoa/SQ==
 
+"@react-native-picker/picker@2.11.4":
+  version "2.11.4"
+  resolved "https://registry.yarnpkg.com/@react-native-picker/picker/-/picker-2.11.4.tgz#7fb09506ee00a82989125cc03e8495204c8afc01"
+  integrity sha512-Kf8h1AMnBo54b1fdiVylP2P/iFcZqzpMYcglC28EEFB1DEnOjsNr6Ucqc+3R9e91vHxEDnhZFbYDmAe79P2gjA==
+
 "@react-native/asset-utils@0.88.1":
   version "0.88.1"
   resolved "https://registry.npmjs.org/@react-native/asset-utils/-/asset-utils-0.88.1.tgz"
@@ -1467,7 +1472,7 @@
 
 "@types/react@~19.3.0":
   version "19.3.0"
-  resolved "https://registry.yarnpkg.com/@types/react/-/react-19.3.0.tgz#3b3ce8d8c1627fb5ccd4dadd57ef445c5a153b77"
+  resolved "https://registry.npmjs.org/@types/react/-/react-19.3.0.tgz"
   integrity sha512-N0rFCuH9YoxG9/m61l9MfpJKfmLOVU0em7ipIz6TRgSSkvReLB9vL85GB+yr8Bs5leqpvg96JSwF4ZS1s4viQg==
   dependencies:
     csstype "^3.2.2"
@@ -2319,7 +2324,7 @@ css-in-js-utils@^3.1.0:
 
 csstype@^3.2.2:
   version "3.2.3"
-  resolved "https://registry.yarnpkg.com/csstype/-/csstype-3.2.3.tgz#ec48c0f3e993e50648c86da559e2610995cf989a"
+  resolved "https://registry.npmjs.org/csstype/-/csstype-3.2.3.tgz"
   integrity sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==
 
 data-view-buffer@^1.0.2:
@@ -2865,6 +2870,11 @@ expo-file-system@~58.0.13:
   resolved "https://registry.npmjs.org/expo-file-system/-/expo-file-system-58.0.13.tgz"
   integrity sha512-+/1aFErkawyky5UdWI06zYeO2DeHUnfaWnYHeiI8M8Z/sB6L66gI3WUxqtvUvKJoaM0Ti1CximD3x3JwteLYIg==
 
+expo-file-system@~58.0.14:
+  version "58.0.14"
+  resolved "https://registry.yarnpkg.com/expo-file-system/-/expo-file-system-58.0.14.tgz#87cd00ee9300531b2537b90debd124b8e781562b"
+  integrity sha512-VK67RQPDmWRHGbvpmPY5MeA1Ulw1LiyKs4KIN8na/q7SlkxYuPPR8biWsyX1S1/8XAHm6y2txUnYjCKh9l93lQ==
+
 expo-font@~58.0.11:
   version "58.0.11"
   resolved "https://registry.npmjs.org/expo-font/-/expo-font-58.0.11.tgz"
@@ -2874,6 +2884,18 @@ expo-glass-effect@^58.0.5:
   version "58.0.5"
   resolved "https://registry.npmjs.org/expo-glass-effect/-/expo-glass-effect-58.0.5.tgz"
   integrity sha512-PkL1X/r0cTs6NG47Xp3TxRvtqSeRmPYhPOHp3GDmZB2oOxpjXge6qLi/bSSv0asFWqf+MLOlXZ+hq2Imuh0Z1g==
+
+expo-image-loader@~58.0.3:
+  version "58.0.3"
+  resolved "https://registry.yarnpkg.com/expo-image-loader/-/expo-image-loader-58.0.3.tgz#a67add1a5a6545429ebefb3a5dc76c185964ad1a"
+  integrity sha512-zlHudxC8OObyqCHmvdxJqURI7886KJ0cUJyn7R/a8FOD9fP837xKDN+u4SIt7XsSSVPNXzMd4Y7mN0pmup8NGA==
+
+expo-image-picker@~58.0.10:
+  version "58.0.10"
+  resolved "https://registry.yarnpkg.com/expo-image-picker/-/expo-image-picker-58.0.10.tgz#060fb7abef9d322439666e5c590684d77ed7677c"
+  integrity sha512-yqQC9UYMWSUxk6U0jaS1vE1w+b9Ru0FJmQ3KjUf9Q9oVg5xBxmg8+Ts+usazMAuPoskNIXJ++VZ+uK6br9yUGQ==
+  dependencies:
+    expo-image-loader "~58.0.3"
 
 expo-keep-awake@~58.0.3:
   version "58.0.3"
