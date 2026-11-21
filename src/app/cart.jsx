@@ -14,20 +14,49 @@ export default function CartScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const loadCart = useCallback(async () => {
-    if (!token) return;
-    try {
-      const data = await apiRequest('/cart', { token });
-      setItems(data.items);
-      setError('');
-    } catch (requestError) {
-      setError(requestError.message);
-    } finally {
-      setLoading(false);
-    }
-  }, [token]);
 
-  useFocusEffect(useCallback(() => { loadCart(); }, [loadCart]));
+useFocusEffect(
+  useCallback(() => {
+    let active = true;
+
+    // Limpiar datos de la sesión anterior.
+    setItems([]);
+    setError('');
+    setLoading(true);
+
+    if (!token) {
+      setLoading(false);
+      return () => {
+        active = false;
+      };
+    }
+
+    async function fetchCart() {
+      try {
+        const data = await apiRequest('/cart', { token });
+
+        if (active) {
+          setItems(data.items || []);
+          setError('');
+        }
+      } catch (requestError) {
+        if (active) {
+          setError(requestError.message);
+        }
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    }
+
+    fetchCart();
+
+    return () => {
+      active = false;
+    };
+  }, [token])
+);
 
   async function addAnother(productId) {
     try {
@@ -79,6 +108,10 @@ async function subtractOne(productId) {
       setError(requestError.message);
     }
   }
+  
+  const total = items.reduce((suma, item) => {
+    return suma + Number(item.product?.price || 0) * Number(item.quantity || 0);
+  }, 0);
 
   if (authLoading || !user) return <AppScreen style={styles.center}><ActivityIndicator size="large" color={theme.colors.primary} /></AppScreen>;
 

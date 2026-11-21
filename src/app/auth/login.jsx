@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View, Image } from 'react-native';
 import { Link, router } from 'expo-router';
 import AppButton from '../../components/AppButton';
 import AppScreen from '../../components/AppScreen';
@@ -36,7 +36,13 @@ export default function LoginScreen() {
     <AppScreen>
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
-          <View style={styles.brand}><Text style={styles.brandName}>FINAzon</Text></View>
+          <View style={styles.logoContainer}>
+            <Image
+              source={require('../../../assets/icon.png')}
+              style={styles.logo}
+              resizeMode="contain"
+            />
+          </View>
           <View style={styles.card}>
             <Text style={styles.title}>Inicia sesión</Text>
             <Text style={styles.subtitle}>Entra para ver el catálogo y tu carrito.</Text>
@@ -65,4 +71,14 @@ const styles = StyleSheet.create({
   switchRow: { flexDirection: 'row', justifyContent: 'center', flexWrap: 'wrap', marginTop: 20 },
   switchText: { color: theme.colors.muted, fontSize: 14 },
   link: { color: theme.colors.primary, fontSize: 14, fontWeight: '700' },
+  logoContainer: {
+  alignItems: 'center',
+  justifyContent: 'center',
+  marginBottom: 24,
+},
+
+logo: {
+  width: 200,
+  height: 200,
+},
 });

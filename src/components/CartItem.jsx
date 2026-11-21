@@ -20,7 +20,11 @@ export default function CartItem({
         </Text>
 
         <Text style={styles.price}>
-          ${Number(product.price).toLocaleString('es-MX')} MXN
+          Precio unitario: ${Number(product.price).toLocaleString('es-MX')} MXN
+        </Text>
+
+        <Text style={styles.price}>
+          Total: ${(Number(product.price) * item.quantity).toLocaleString('es-MX')} MXN
         </Text>
 
         <Text style={styles.quantity}>
