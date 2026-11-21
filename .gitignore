@@ -41,3 +41,7 @@ server/.env
 # generated native folders
 /ios
 /android
+
+# Variables privadas
+.env
+**/.env
