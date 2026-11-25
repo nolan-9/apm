@@ -8,7 +8,6 @@ import {
   Text,
   View,
 } from 'react-native';
-import { useState } from 'react';
 import theme from '../styles/theme';
 
 export default function CategorySelector({
