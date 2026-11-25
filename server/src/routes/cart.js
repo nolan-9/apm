@@ -6,6 +6,7 @@ import requireAuth from '../middleware/requireAuth.js';
 
 const router = Router();
 router.use(requireAuth);
+const cartProductFields = 'name price category stock';
 
 function validId(id) {
   return mongoose.isValidObjectId(id);
@@ -14,12 +15,15 @@ function validId(id) {
 function cartResponse(cart) {
   return cart
     .filter((item) => item.product)
-    .map((item) => ({ product: item.product, quantity: item.quantity }));
+    .map((item) => ({
+      product: item.product,
+      quantity: Math.min(item.quantity, item.product.stock ?? 0)
+    }));
 }
 
 router.get('/', async (req, res, next) => {
   try {
-    const user = await User.findById(req.user.id).populate('cart.product', 'name price category');
+    const user = await User.findById(req.user.id).populate('cart.product', cartProductFields);
     return res.json({ items: cartResponse(user.cart) });
   } catch (error) {
     return next(error);
@@ -29,16 +33,33 @@ router.get('/', async (req, res, next) => {
 router.post('/:productId', async (req, res, next) => {
   try {
     if (!validId(req.params.productId)) return res.status(400).json({ message: 'El producto solicitado no es válido.' });
-    const product = await Product.findById(req.params.productId);
+    const product = await Product.findById(req.params.productId).select(cartProductFields);
     if (!product) return res.status(404).json({ message: 'No se encontró el producto.' });
-    const user = await User.findById(req.user.id);
-    const item = user.cart.find((entry) => String(entry.product) === String(product._id));
-    if (item) item.quantity += 1;
-    else user.cart.push({ product: product._id, quantity: 1 });
-    await user.save();
-    await user.populate('cart.product', 'name price category');
-    const saved = user.cart.find((entry) => String(entry.product?._id || entry.product) === String(product._id));
-    return res.json({ item: { product: saved.product, quantity: saved.quantity } });
+    const stock = product.stock ?? 0;
+    if (stock === 0) return res.status(409).json({ message: 'Este producto está agotado.' });
+
+    const productId = product._id;
+    const userId = req.user.id;
+
+    // Las condiciones se comprueban al escribir para evitar duplicados y excesos de stock.
+    const added = await User.updateOne(
+      { _id: userId, 'cart.product': { $ne: productId } },
+      { $push: { cart: { product: productId, quantity: 1 } } }
+    );
+    if (added.modifiedCount) return res.json({ item: { product, quantity: 1 } });
+
+    const user = await User.findOneAndUpdate(
+      { _id: userId, cart: { $elemMatch: { product: productId, quantity: { $lt: stock } } } },
+      { $inc: { 'cart.$.quantity': 1 } },
+      { new: true }
+    ).select('cart');
+
+    if (!user) {
+      return res.status(409).json({ message: 'No se pudo aumentar la cantidad. Revisa el stock disponible.' });
+    }
+
+    const item = user.cart.find((entry) => entry.product.equals(productId));
+    return res.json({ item: { product, quantity: item.quantity } });
   } catch (error) {
     return next(error);
   }
@@ -54,7 +75,10 @@ router.patch('/:productId', async (req, res, next) => {
       });
     }
 
-    const user = await User.findById(req.user.id);
+    const [user, product] = await Promise.all([
+      User.findById(req.user.id),
+      Product.findById(productId).select('stock'),
+    ]);
 
     if (!user) {
       return res.status(404).json({
@@ -63,7 +87,7 @@ router.patch('/:productId', async (req, res, next) => {
     }
 
     const item = user.cart.find(
-      (entry) => String(entry.product) === String(productId)
+      (entry) => entry.product.equals(productId)
     );
 
     if (!item) {
@@ -72,27 +96,22 @@ router.patch('/:productId', async (req, res, next) => {
       });
     }
 
-    if (item.quantity <= 1) {
-      user.cart = user.cart.filter(
-        (entry) => String(entry.product) !== String(productId)
-      );
+    const stock = product?.stock ?? 0;
+    const quantity = Math.max(0, Math.min(item.quantity, stock) - 1);
+    const removed = quantity === 0;
+    const match = { product: item.product, quantity: item.quantity };
+    const updated = await User.updateOne(
+      { _id: user.id, cart: { $elemMatch: match } },
+      removed
+        ? { $pull: { cart: match } }
+        : { $set: { 'cart.$.quantity': quantity } }
+    );
 
-      await user.save();
-
-      return res.json({
-        removed: true,
-        quantity: 0
-      });
+    if (!updated.modifiedCount) {
+      return res.status(409).json({ message: 'El carrito cambió. Intenta de nuevo.' });
     }
 
-    item.quantity -= 1;
-
-    await user.save();
-
-    return res.json({
-      removed: false,
-      quantity: item.quantity
-    });
+    return res.json({ removed, quantity, stock });
 
   } catch (error) {
     return next(error);

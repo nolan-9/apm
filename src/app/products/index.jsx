@@ -12,13 +12,15 @@ import theme from '../../styles/theme';
 export default function ProductsScreen() {
   const { user, token, logout, loading: authLoading } = useRequireAuth();
   const [products, setProducts] = useState([]);
-  const [cartCount, setCartCount] = useState(0);
+  const [cartQuantities, setCartQuantities] = useState({});
+  const [adding, setAdding] = useState(false);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   const loadProducts = useCallback(async () => {
     if (!token) return;
+    setLoading(true);
     setError('');
     try {
       const [productData, cartData] = await Promise.all([
@@ -26,7 +28,9 @@ export default function ProductsScreen() {
         apiRequest('/cart', { token }),
       ]);
       setProducts(productData.products);
-      setCartCount(cartData.items.reduce((sum, item) => sum + item.quantity, 0));
+      setCartQuantities(Object.fromEntries(
+        cartData.items.map((item) => [item.product._id, item.quantity])
+      ));
     } catch (requestError) {
       setError(requestError.message);
     } finally {
@@ -39,11 +43,21 @@ export default function ProductsScreen() {
   }, [loadProducts]));
 
   async function addToCart(product) {
+    setAdding(true);
+    setError('');
     try {
-      await apiRequest(`/cart/${product._id}`, { method: 'POST', token });
-      setCartCount((count) => count + 1);
+      const { item } = await apiRequest(`/cart/${product._id}`, { method: 'POST', token });
+      setCartQuantities((current) => ({ ...current, [product._id]: item.quantity }));
+      setProducts((current) => current.map((entry) =>
+        entry._id === product._id ? { ...entry, stock: item.product.stock } : entry
+      ));
     } catch (requestError) {
-      Alert.alert('No se pudo agregar', requestError.message);
+      if (requestError.status === 409 || requestError.status === 404) {
+        await loadProducts();
+      }
+      setError(requestError.message);
+    } finally {
+      setAdding(false);
     }
   }
 
@@ -76,6 +90,7 @@ export default function ProductsScreen() {
     const query = search.trim().toLowerCase();
     return !query || `${product.name} ${product.category} ${product.description}`.toLowerCase().includes(query);
   });
+  const cartCount = Object.values(cartQuantities).reduce((sum, quantity) => sum + quantity, 0);
 
   if (authLoading || !user) return <AppScreen style={styles.center}><ActivityIndicator size="large" color={theme.colors.primary} /></AppScreen>;
   const isAdmin = user.role === 'admin';
@@ -148,6 +163,8 @@ export default function ProductsScreen() {
         renderItem={({ item }) => (
           <ProductCard
             product={item}
+            cartQuantity={cartQuantities[item._id] ?? 0}
+            addingDisabled={adding || loading}
             onAdd={() => addToCart(item)}
             onEdit={() => router.push(`/products/${item._id}/edit`)}
             onDelete={() => deleteProduct(item)}

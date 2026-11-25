@@ -12,106 +12,70 @@ export default function CartScreen() {
   const { token, user, loading: authLoading } = useRequireAuth();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
   const [error, setError] = useState('');
 
+  const loadCart = useCallback(async () => {
+    const data = await apiRequest('/cart', { token });
+    return data.items || [];
+  }, [token]);
 
-useFocusEffect(
-  useCallback(() => {
-    let active = true;
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
+      setItems([]);
+      setError('');
+      setLoading(Boolean(token));
 
-    // Limpiar datos de la sesión anterior.
-    setItems([]);
-    setError('');
-    setLoading(true);
+      if (token) {
+        loadCart()
+          .then((cart) => {
+            if (active) setItems(cart);
+          })
+          .catch((requestError) => {
+            if (active) setError(requestError.message);
+          })
+          .finally(() => {
+            if (active) setLoading(false);
+          });
+      }
 
-    if (!token) {
-      setLoading(false);
       return () => {
         active = false;
       };
-    }
+    }, [loadCart, token])
+  );
 
-    async function fetchCart() {
-      try {
-        const data = await apiRequest('/cart', { token });
-
-        if (active) {
-          setItems(data.items || []);
-          setError('');
-        }
-      } catch (requestError) {
-        if (active) {
-          setError(requestError.message);
-        }
-      } finally {
-        if (active) {
-          setLoading(false);
+  async function changeItem(productId, method) {
+    setUpdating(true);
+    setError('');
+    try {
+      const data = await apiRequest(`/cart/${productId}`, { method, token });
+      if (method === 'DELETE' || data.removed) {
+        setItems((current) => current.filter((item) => item.product._id !== productId));
+      } else {
+        setItems((current) => current.map((item) => {
+          if (item.product._id !== productId) return item;
+          return data.item ?? {
+            ...item,
+            product: { ...item.product, stock: data.stock },
+            quantity: data.quantity,
+          };
+        }));
+      }
+    } catch (requestError) {
+      setError(requestError.message);
+      if (requestError.status === 409 || requestError.status === 404) {
+        try {
+          setItems(await loadCart());
+        } catch (refreshError) {
+          setError(refreshError.message);
         }
       }
-    }
-
-    fetchCart();
-
-    return () => {
-      active = false;
-    };
-  }, [token])
-);
-
-  async function addAnother(productId) {
-    try {
-      const data = await apiRequest(`/cart/${productId}`, { method: 'POST', token });
-      setItems((current) => current.map((item) => item.product._id === productId ? { ...item, quantity: data.item.quantity } : item));
-    } catch (requestError) {
-      setError(requestError.message);
+    } finally {
+      setUpdating(false);
     }
   }
-
-
-async function subtractOne(productId) {
-  try {
-    const data = await apiRequest(`/cart/${productId}`, {
-      method: 'PATCH',
-      token
-    });
-
-    if (data.removed) {
-      // Eliminar el producto de la pantalla
-      setItems((current) =>
-        current.filter(
-          (item) => item.product._id !== productId
-        )
-      );
-    } else {
-      // Actualizar la cantidad en la pantalla
-      setItems((current) =>
-        current.map((item) =>
-          item.product._id === productId
-            ? { ...item, quantity: data.quantity }
-            : item
-        )
-      );
-    }
-
-    setError('');
-  } catch (requestError) {
-    setError(requestError.message);
-  }
-}
-
-
-  async function removeItem(productId) {
-    try {
-      await apiRequest(`/cart/${productId}`, { method: 'DELETE', token });
-      setItems((current) => current.filter((item) => item.product._id !== productId));
-    } catch (requestError) {
-      setError(requestError.message);
-    }
-  }
-  
-  const total = items.reduce((suma, item) => {
-    return suma + Number(item.product?.price || 0) * Number(item.quantity || 0);
-  }, 0);
 
   if (authLoading || !user) return <AppScreen style={styles.center}><ActivityIndicator size="large" color={theme.colors.primary} /></AppScreen>;
 
@@ -134,9 +98,10 @@ async function subtractOne(productId) {
         renderItem={({ item }) => (
           <CartItem
             item={item}
-            onAdd={() => addAnother(item.product._id)}
-            onSubtract={() => subtractOne(item.product._id)}
-            onRemove={() => removeItem(item.product._id)}
+            updating={updating}
+            onAdd={() => changeItem(item.product._id, 'POST')}
+            onSubtract={() => changeItem(item.product._id, 'PATCH')}
+            onRemove={() => changeItem(item.product._id, 'DELETE')}
           />
 
         )}

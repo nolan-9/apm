@@ -68,8 +68,9 @@ export async function apiRequest(
   const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
-    throw new Error(
-      data.message || 'Ocurrió un error. Intenta de nuevo.'
+    throw Object.assign(
+      new Error(data.message || 'Ocurrió un error. Intenta de nuevo.'),
+      { status: response.status }
     );
   }
 

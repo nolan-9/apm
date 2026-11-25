@@ -16,12 +16,16 @@ import AppButton from './AppButton';
 
 export default function ProductCard({
   product,
+  cartQuantity,
+  addingDisabled,
   onAdd,
   onEdit,
   onDelete,
   isAdmin = false,
 }) {
   const [imageVisible, setImageVisible] = useState(false);
+  const stock = product.stock ?? 0;
+  const atLimit = cartQuantity >= stock;
 
   return (
     <View style={styles.card}>
@@ -75,11 +79,16 @@ export default function ProductCard({
           ${Number(product.price).toLocaleString('es-MX')} MXN
         </Text>
 
+        <Text style={styles.stock}>
+          {stock > 0 ? `Stock disponible: ${stock} unidades` : 'Agotado · 0 unidades'}
+        </Text>
+
         {/* Agregar al carrito */}
         <AppButton
-          title="Agregar al carrito"
+          title={stock > 0 && atLimit ? 'Límite alcanzado' : 'Agregar al carrito'}
           variant="accent"
           onPress={onAdd}
+          disabled={atLimit || addingDisabled}
           style={styles.addButton}
         />
 
@@ -241,6 +250,12 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: '800',
     marginTop: 8,
+  },
+
+  stock: {
+    color: theme.colors.muted,
+    fontSize: 13,
+    marginTop: 4,
   },
 
   addButton: {

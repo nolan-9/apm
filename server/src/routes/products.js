@@ -63,6 +63,22 @@ function fieldsFrom(body = {}, { creating = false } = {}) {
     fields.category = 'General';
   }
 
+  if (body.stock !== undefined) {
+    const value = body.stock;
+    const stock = typeof value === 'string' && /^\d+$/.test(value.trim())
+      ? Number(value)
+      : value;
+
+    if (!Number.isSafeInteger(stock) || stock < 0) {
+      throw Object.assign(
+        new Error('El stock debe ser un número entero mayor o igual a 0.'),
+        { status: 400 }
+      );
+    }
+
+    fields.stock = stock;
+  }
+
   return fields;
 }
 
@@ -84,6 +100,7 @@ router.get('/', async (_req, res, next) => {
     const productsWithImages = await Promise.all(
       products.map(async (product) => ({
         ...product,
+        stock: product.stock ?? 0,
         imageUrl: product.imageKey
           ? await obtenerUrlImagen(product.imageKey)
           : null,
@@ -123,6 +140,7 @@ router.get('/:id', async (req, res, next) => {
     return res.json({
       product: {
         ...product,
+        stock: product.stock ?? 0,
         imageUrl: product.imageKey
           ? await obtenerUrlImagen(product.imageKey)
           : null,

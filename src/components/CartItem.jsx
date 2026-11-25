@@ -5,11 +5,13 @@ import theme from '../styles/theme';
 
 export default function CartItem({
   item,
+  updating,
   onAdd,
   onSubtract,
   onRemove
 }) {
   const product = item.product;
+  const stock = product.stock ?? 0;
 
   return (
     <View style={styles.card}>
@@ -31,12 +33,17 @@ export default function CartItem({
           Cantidad: {item.quantity}
         </Text>
 
+        <Text style={styles.quantity}>
+          Stock disponible: {stock} unidades
+        </Text>
+
         <View style={styles.actions}>
 
           <AppButton
             title="−"
             variant="outline"
             onPress={onSubtract}
+            disabled={updating || item.quantity === 0}
             style={styles.smallButton}
           />
 
@@ -44,6 +51,7 @@ export default function CartItem({
             title="＋"
             variant="accent"
             onPress={onAdd}
+            disabled={updating || item.quantity >= stock}
             style={styles.smallButton}
           />
 
@@ -51,6 +59,7 @@ export default function CartItem({
             title="Quitar"
             variant="outline"
             onPress={onRemove}
+            disabled={updating}
             style={styles.smallButton}
           />
 

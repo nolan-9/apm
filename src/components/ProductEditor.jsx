@@ -27,6 +27,7 @@ const emptyProduct = {
   name: '',
   description: '',
   price: '',
+  stock: '0',
   category: 'General',
 };
 
@@ -37,6 +38,7 @@ function productValues(product) {
     name: product.name || '',
     description: product.description || '',
     price: String(product.price ?? ''),
+    stock: String(product.stock ?? 0),
     category: product.category || 'General',
   };
 }
@@ -219,6 +221,7 @@ export default function ProductEditor({
     setError('');
 
     const price = Number(values.price);
+    const stock = Number(values.stock);
 
     if (!values.name.trim()) {
       setError('Escribe el nombre del producto.');
@@ -239,12 +242,18 @@ export default function ProductEditor({
       return;
     }
 
+    if (!/^\d+$/.test(values.stock.trim()) || !Number.isSafeInteger(stock)) {
+      setError('El stock debe ser un número entero mayor o igual a 0.');
+      return;
+    }
+
     try {
       await onSave(
         {
           name: values.name.trim(),
           description: values.description.trim(),
           price,
+          stock,
           category: values.category,
         },
         selectedImage
@@ -299,6 +308,13 @@ export default function ProductEditor({
           value={values.price}
           onChangeText={(value) => update('price', value)}
           keyboardType="decimal-pad"
+        />
+
+        <TextField
+          label="Stock (unidades)"
+          value={values.stock}
+          onChangeText={(value) => update('stock', value)}
+          keyboardType="number-pad"
         />
 
         <Text style={styles.label}>Categoría</Text>
