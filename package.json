@@ -27,11 +27,14 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "start:local": "cross-env EXPO_PUBLIC_APP_MODE=local expo start --clear",
+    "start:aws": "cross-env EXPO_PUBLIC_APP_MODE=aws expo start --clear"
   },
   "private": true,
   "devDependencies": {
     "@types/react": "~19.3.0",
+    "cross-env": "^10.1.0",
     "eslint": "^9.39.5",
     "eslint-config-expo": "~58.0.4",
     "typescript": "~6.0.3"
