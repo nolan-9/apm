@@ -8,19 +8,36 @@ import {
   Text,
   View,
 } from 'react-native';
+import { useState } from 'react';
 import theme from '../styles/theme';
 
 export default function CategorySelector({
   categories = [],
   value,
   onChange,
+  onDelete,
   disabled = false,
 }) {
   const [visible, setVisible] = useState(false);
+  const [deletingCategoryId, setDeletingCategoryId] = useState(null);
+  const [deleteError, setDeleteError] = useState('');
 
   function selectCategory(category) {
     onChange(category.name);
     setVisible(false);
+  }
+
+  async function deleteCategory(category) {
+    setDeleteError('');
+    setDeletingCategoryId(category._id);
+
+    try {
+      await onDelete(category);
+    } catch (error) {
+      setDeleteError(error.message);
+    } finally {
+      setDeletingCategoryId(null);
+    }
   }
 
   return (
@@ -33,7 +50,11 @@ export default function CategorySelector({
         onPress={() => setVisible(true)}
         disabled={disabled}
         accessibilityRole="button"
-        accessibilityLabel="Seleccionar categoría"
+        accessibilityLabel={
+          onDelete
+            ? 'Seleccionar o eliminar categoría'
+            : 'Seleccionar categoría'
+        }
       >
         <Text style={styles.selectedText}>
           {value || 'Selecciona una categoría'}
@@ -69,23 +90,51 @@ export default function CategorySelector({
                 </Text>
               }
               renderItem={({ item }) => (
-                <Pressable
-                  style={[
-                    styles.option,
-                    value === item.name && styles.selectedOption,
-                  ]}
-                  onPress={() => selectCategory(item)}
-                >
-                  <Text style={styles.optionText}>
-                    {item.name}
-                  </Text>
+                <View style={styles.optionRow}>
+                  <Pressable
+                    style={[
+                      styles.option,
+                      value === item.name && styles.selectedOption,
+                    ]}
+                    onPress={() => selectCategory(item)}
+                    disabled={deletingCategoryId !== null}
+                    accessibilityRole="button"
+                  >
+                    <Text style={styles.optionText}>
+                      {item.name}
+                    </Text>
 
-                  {value === item.name && (
-                    <Text style={styles.check}>✓</Text>
-                  )}
-                </Pressable>
+                    {value === item.name && (
+                      <Text style={styles.check}>✓</Text>
+                    )}
+                  </Pressable>
+
+                  {onDelete ? (
+                    <Pressable
+                      style={styles.deleteCategory}
+                      onPress={() => deleteCategory(item)}
+                      disabled={
+                        disabled || deletingCategoryId !== null
+                      }
+                      accessibilityRole="button"
+                      accessibilityLabel={`Eliminar categoría ${item.name}`}
+                    >
+                      <Text style={styles.deleteCategoryText}>
+                        {deletingCategoryId === item._id
+                          ? '…'
+                          : 'Eliminar'}
+                      </Text>
+                    </Pressable>
+                  ) : null}
+                </View>
               )}
             />
+
+            {deleteError ? (
+              <Text accessibilityRole="alert" style={styles.deleteError}>
+                {deleteError}
+              </Text>
+            ) : null}
           </View>
         </SafeAreaView>
       </Modal>
@@ -144,11 +193,16 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '600',
   },
-  option: {
-    paddingVertical: 16,
-    paddingHorizontal: 12,
+  optionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB',
+  },
+  option: {
+    flex: 1,
+    paddingVertical: 16,
+    paddingHorizontal: 12,
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
@@ -163,6 +217,20 @@ const styles = StyleSheet.create({
     color: theme.colors.primary,
     fontSize: 18,
     fontWeight: '700',
+  },
+  deleteCategory: {
+    minHeight: 44,
+    justifyContent: 'center',
+    paddingHorizontal: 10,
+  },
+  deleteCategoryText: {
+    color: theme.colors.danger,
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  deleteError: {
+    color: theme.colors.danger,
+    marginTop: 10,
   },
   empty: {
     color: theme.colors.muted,

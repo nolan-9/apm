@@ -2,7 +2,9 @@
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   Image,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -217,6 +219,46 @@ export default function ProductEditor({
     }
   }
 
+  function confirmCategoryDeletion(category) {
+    const message = `¿Eliminar la categoría “${category.name}”?`;
+
+    if (Platform.OS === 'web') {
+      return Promise.resolve(globalThis.confirm?.(message) ?? false);
+    }
+
+    return new Promise((resolve) => {
+      Alert.alert('Eliminar categoría', message, [
+        { text: 'Cancelar', style: 'cancel', onPress: () => resolve(false) },
+        {
+          text: 'Eliminar',
+          style: 'destructive',
+          onPress: () => resolve(true),
+        },
+      ], { cancelable: true, onDismiss: () => resolve(false) });
+    });
+  }
+
+  async function deleteCategory(category) {
+    const confirmed = await confirmCategoryDeletion(category);
+
+    if (!confirmed) return;
+
+    await apiRequest(`/categories/${category._id}`, {
+      method: 'DELETE',
+      token,
+    });
+
+    setCategories((current) =>
+      current.filter((entry) => entry._id !== category._id)
+    );
+
+    setValues((current) => (
+      current.category === category.name
+        ? { ...current, category: '' }
+        : current
+    ));
+  }
+
   async function submit() {
     setError('');
 
@@ -330,6 +372,7 @@ export default function ProductEditor({
               categories={categories}
               value={values.category}
               onChange={(category) => update('category', category)}
+              onDelete={deleteCategory}
               disabled={saving || savingCategory}
             />
           </View>

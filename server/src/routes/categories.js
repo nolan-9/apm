@@ -1,5 +1,7 @@
 import { Router } from 'express';
+import mongoose from 'mongoose';
 import Category from '../models/Category.js';
+import Product from '../models/Product.js';
 import requireAuth from '../middleware/requireAuth.js';
 import requireAdmin from '../middleware/requireAdmin.js';
 
@@ -61,6 +63,43 @@ router.post('/', requireAdmin, async (req, res, next) => {
       });
     }
 
+    return next(error);
+  }
+});
+
+// Eliminar categorías únicamente cuando no estén asignadas a productos.
+router.delete('/:id', requireAdmin, async (req, res, next) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({
+        message: 'La categoría solicitada no es válida.',
+      });
+    }
+
+    const category = await Category.findById(req.params.id).lean();
+
+    if (!category) {
+      return res.status(404).json({
+        message: 'No se encontró la categoría.',
+      });
+    }
+
+    const productCount = await Product.countDocuments({
+      category: category.name,
+    });
+
+    if (productCount > 0) {
+      return res.status(409).json({
+        message: `No se puede eliminar la categoría porque ${productCount === 1 ? 'hay un producto asignado' : `hay ${productCount} productos asignados`}. Reasigna ${productCount === 1 ? 'ese producto' : 'esos productos'} e inténtalo de nuevo.`,
+      });
+    }
+
+    await Category.findByIdAndDelete(category._id);
+
+    return res.json({
+      message: 'Categoría eliminada.',
+    });
+  } catch (error) {
     return next(error);
   }
 });

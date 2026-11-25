@@ -46,12 +46,13 @@ La API usa MongoDB local por defecto. Para conectar MongoDB Atlas, cambia `MONGO
 - `server/src/`: autenticación, productos, carrito y modelos MongoDB.
 - `docker-compose.yml`: solo MongoDB local; no se reutiliza la configuración anterior de Strapi.
 
-Las cuentas creadas desde el registro tienen el rol `user` y solo pueden consultar el catálogo. El usuario administrador se configura con `ADMIN_EMAIL` y `ADMIN_PASSWORD` en `server/.env`; puede crear, editar y eliminar productos. Las rutas de modificación también rechazan peticiones de usuarios sin el rol `admin`.
+Las cuentas creadas desde el registro tienen el rol `user` y solo pueden consultar el catálogo. El usuario administrador se configura con `ADMIN_EMAIL` y `ADMIN_PASSWORD` en `server/.env`; puede crear, editar y eliminar productos y categorías. Las categorías asignadas a productos no se pueden eliminar hasta que esos productos se reasignen. Las rutas de modificación también rechazan peticiones de usuarios sin el rol `admin`.
 
 ## API incluida
 
 - `POST /api/auth/register`, `POST /api/auth/login`, `GET /api/auth/me`
 - `GET`, `POST /api/products`; `GET`, `PUT`, `DELETE /api/products/:id`
+- `GET`, `POST /api/categories`; `DELETE /api/categories/:id`
 - `GET /api/cart`; `POST`, `DELETE /api/cart/:productId`
 
 Las rutas de productos y carrito requieren iniciar sesión. Agregar un artículo por segunda vez aumenta su cantidad; quitarlo lo elimina del carrito.

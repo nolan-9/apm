@@ -79,13 +79,39 @@ export default function ProductCard({
           ${Number(product.price).toLocaleString('es-MX')} MXN
         </Text>
 
-        <Text style={styles.stock}>
-          {stock > 0 ? `Stock disponible: ${stock} unidades` : 'Agotado · 0 unidades'}
-        </Text>
+        <View
+          accessibilityLabel={
+            stock > 0
+              ? `Disponible: ${stock} unidades`
+              : 'Agotado'
+          }
+          accessibilityRole="text"
+          style={[
+            styles.stockBadge,
+            stock > 0 ? styles.stockAvailable : styles.stockExhausted,
+          ]}
+        >
+          <Text
+            style={[
+              styles.stockText,
+              stock > 0
+                ? styles.stockAvailableText
+                : styles.stockExhaustedText,
+            ]}
+          >
+            {stock > 0 ? `Disponible · ${stock} unidades` : 'Agotado'}
+          </Text>
+        </View>
 
         {/* Agregar al carrito */}
         <AppButton
-          title={stock > 0 && atLimit ? 'Límite alcanzado' : 'Agregar al carrito'}
+          title={
+            stock === 0
+              ? 'Agotado'
+              : atLimit
+                ? 'Límite alcanzado'
+                : 'Agregar al carrito'
+          }
           variant="accent"
           onPress={onAdd}
           disabled={atLimit || addingDisabled}
@@ -252,10 +278,33 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
 
-  stock: {
-    color: theme.colors.muted,
+  stockBadge: {
+    alignSelf: 'flex-start',
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    marginTop: 8,
+  },
+
+  stockAvailable: {
+    backgroundColor: '#E8F3EC',
+  },
+
+  stockExhausted: {
+    backgroundColor: '#FCE9E8',
+  },
+
+  stockText: {
     fontSize: 13,
-    marginTop: 4,
+    fontWeight: '700',
+  },
+
+  stockAvailableText: {
+    color: theme.colors.success,
+  },
+
+  stockExhaustedText: {
+    color: theme.colors.danger,
   },
 
   addButton: {
